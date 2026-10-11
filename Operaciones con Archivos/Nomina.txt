@@ -1,0 +1,25 @@
+E01
+Luis Carlos Gómez
+RRHH
+18000.0
+3
+E02
+Karla Patricia Mendoza Ruíz
+Marketing
+16700.0
+3
+E03
+Harold Solis Mercado
+TI
+36500.0
+2
+E01
+Luis Carlos Gómez
+RRHH
+18000.0
+3
+E02
+Karla Patricia Mendoza Ruíz
+Marketing
+16700.0
+3
