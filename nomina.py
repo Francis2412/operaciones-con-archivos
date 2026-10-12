@@ -1,114 +1,214 @@
-from os import SEEK_END
-from os import SEEK_SET
+from os import SEEK_END, SEEK_SET
 
 empleado = {
     "id": "",
     "nombre": "",
     "unidad": "",
-    "Salario": 0.0,
+    "salario": 0.0,
     "antiguedad": 0
 }
 
 nomina = []
 
 def agregar_empleado():
-    print("************** REGISTRO DE EMPLEADO **************")
-    empleado["id"] = input("Digite el ID del nuevo empleado: ")
-    empleado["nombre"] = input("Digite el nombre del empleado: ")
-    empleado["unidad"] = input("Digite la unidad: ")
-    empleado["salario"] = float(input("Digite el salario: "))
-    empleado["antiguedad"] = int(input("Digite la antiguedad: "))
+    print("***** REGISTRO DE EMPLEADOS *****")
+
+    id = input("Digite el ID del nuevo empleado: ").strip()
+
+    if id == "":
+        print("El ID no puede estar vacio.")
+        return
+
+    if buscar_empleado(id) is not None:
+        print("Ya existe un empleado con ese ID.")
+        return
+
+    nombre = input("Digite el nombre: ").strip()
+    unidad = input("Digite la unidad: ").strip()
+
+    try:
+        salario = float(input("Digite el salario: "))
+        antiguedad = int(input("Digite la antiguedad: "))
+
+        if salario < 0 or antiguedad < 0:
+            print("El salario y la antiguedad no pueden ser negativos.")
+            return
+
+    except ValueError:
+        print("Error: el salario debe ser numerico y la antiguedad un entero.")
+        return
+
+    empleado["id"] = id
+    empleado["nombre"] = nombre
+    empleado["unidad"] = unidad
+    empleado["salario"] = salario
+    empleado["antiguedad"] = antiguedad
+
     nomina.append(empleado.copy())
+    print("Empleado registrado correctamente.")
 
-def buscar_empleado(id:str)->int:
-    ''' La fución retorna el índice del empleado en la lista, None si no está'''
-    index = None
-    for i in range(0, nomina.count):
+def buscar_empleado(id: str) -> int:
+    """Retorna el indice del empleado o None si no existe."""
+    for i in range(len(nomina)):
         if id == nomina[i]["id"]:
-            index = i
-            break
-    return index
+            return i
 
-def eliminar_empleado(id:str)->bool:
-    accion = False 
-    index = buscar_empleado(id)
-    if index != None:
+    return None
+
+def eliminar_empleado(index: int) -> bool:
+    if 0 <= index < len(nomina):
         nomina.pop(index)
-        accion = True
-    return accion
+        return True
 
-def actualizar_empleado(index:str)->bool:
-    accion = False
-    index = buscar_empleado(id)
-    if index != None:
-        print("***** ACTUALIZAR EMPLEADO ******")
-        print("1........Nombre")
-        print("2........Unidad")
-        print("3........Salario")
-        print("4........Antiguedad")
-        print("5........Ninguno")
-        opc = int(input("Seleccione la opcion del campo a modificar: "))
-        match opc:
-            case 1: 
-                nomina[index]["nombre"]= input("Digite el nuevo nombre del empleado: ")
+    return False
 
-            case 2: 
-                nomina[index]["unidad"]= input("Digite el nombre del empleado: ")
+def actualizar_empleado(index: int) -> bool:
+    if not 0 <= index < len(nomina):
+        print("Indice de empleado no valido.")
+        return False
 
-            case 3:
-                nomina[index]["salario"]= float(input("Digite el salario: "))
+    print("***** ACTUALIZAR EMPLEADO *****")
+    print("1..........Nombre")
+    print("2..........Unidad")
+    print("3..........Salario")
+    print("4..........Antiguedad")
+    print("5..........Ninguno")
+    print("******************************")
 
-            case 4:
-                nomina[index]["antiguedad"] = int(input("Digite la antiguedad: "))
+    try:
+        opcion = int(input("Seleccione la opcion del campo a modificar: "))
+    except ValueError:
+        print("Debe ingresar un numero.")
+        return False
 
-            case 5:
-                print("Ninguno de los campos se ha moficado...")
+    match opcion:
+        case 1:
+            nombre = input("Digite el nuevo nombre del empleado: ").strip()
+            if nombre == "":
+                print("El nombre no puede estar vacio.")
+                return False
+            nomina[index]["nombre"] = nombre
 
-        accion = True
-    return accion
+        case 2:
+            unidad = input("Digite la nueva unidad del empleado: ").strip()
+            if unidad == "":
+                print("La unidad no puede estar vacia.")
+                return False
+            nomina[index]["unidad"] = unidad
+
+        case 3:
+            try:
+                salario = float(input("Digite el nuevo salario del empleado: "))
+                if salario < 0:
+                    print("El salario no puede ser negativo.")
+                    return False
+                nomina[index]["salario"] = salario
+            except ValueError:
+                print("El salario debe ser numerico.")
+                return False
+
+        case 4:
+            try:
+                antiguedad = int(input("Digite la nueva antiguedad del empleado: "))
+                if antiguedad < 0:
+                    print("La antiguedad no puede ser negativa.")
+                    return False
+                nomina[index]["antiguedad"] = antiguedad
+            except ValueError:
+                print("La antiguedad debe ser un numero entero.")
+                return False
+
+        case 5:
+            print("Ningun campo ha sido modificado.")
+            return False
+
+        case _:
+            print("Opcion no valida.")
+            return False
+
+    print("Empleado actualizado correctamente.")
+    return True
+
 
 def guardar_nomina():
-    fichero = open("Nomina.txt", "a", encoding= "UTP-8")
-    for emp in nomina:
-        fichero.write(emp["id"])
-        fichero.write(emp["nombre"])
-        fichero.write(emp["unidad"])
-        fichero.writr(str(emp["salario"]))
-        fichero.writr(str(emp["antiguedad"]))
-    fichero.close()
+    try:
+        with open("Nomina.txt", "w", encoding="UTF-8") as fichero:
+            for emp in nomina:
+                fichero.write(emp["id"] + "\n")
+                fichero.write(emp["nombre"] + "\n")
+                fichero.write(emp["unidad"] + "\n")
+                fichero.write(str(emp["salario"]) + "\n")
+                fichero.write(str(emp["antiguedad"]) + "\n")
 
-def cargar_nomina()->int:
-    '''La funcion retornar en un numero de registro cargados a la lista 0 -> si no hay registros'''
+        print("Nomina guardada correctamente.")
+
+    except OSError as error:
+        print(f"No se pudo guardar la nomina: {error}")
+
+def cargar_nomina() -> int:
+    """Carga los empleados del archivo y retorna la cantidad cargada."""
     cantReg = 0
-    fichero = open("Nomina.txt", "r", encoding= "UTF-08")
-    # Verificar si el archivo si el archivo tiene datos: 0 bytes -> no tiene
-    fichero.seek(0, SEEK_END)
-    # Calcular la cantidad de bytes desde el incio hasta el final
-    cantBytes = fichero.tell()
-    if cantBytes != 0:
-        fichero.seek(0, SEEK_SET)
-        campo = fichero.readline()
-        while campo != "":
-            empleado["id"] = campo.rstrip()
-            campo = fichero.readline()
-            empleado["nombre"] = campo.rstrip()
-            campo = fichero.readline()
-            empleado["unidad"] = campo.rstrip()
-            campo = fichero.readline()
-            empleado["unidad"] = campo
-            campo = fichero.readline()
-            empleado["salario"] = float(campo)
-            campo = fichero.readline()
-            empleado["antiguedad"] = int(campo)
+    nomina.clear()
+
+    try:
+        with open("Nomina.txt", "r", encoding="UTF-8") as fichero:
+            fichero.seek(0, SEEK_END)
+            cantBytes = fichero.tell()
+
+            if cantBytes == 0:
+                return 0
+
+            fichero.seek(0, SEEK_SET)
+            lineas = fichero.readlines()
+
+    except FileNotFoundError:
+        return 0
+    except OSError as error:
+        print(f"No se pudo leer la nomina: {error}")
+        return 0
+
+    if len(lineas) % 5 != 0:
+        print("Advertencia: el archivo contiene un registro incompleto.")
+
+    for i in range(0, len(lineas) - 4, 5):
+        try:
+            id = lineas[i].strip()
+            nombre = lineas[i + 1].strip()
+            unidad = lineas[i + 2].strip()
+            salario = float(lineas[i + 3].strip())
+            antiguedad = int(lineas[i + 4].strip())
+
+            if id == "" or salario < 0 or antiguedad < 0:
+                print(f"Registro invalido en la linea {i + 1}. Se omitira.")
+                continue
+
+            if buscar_empleado(id) is not None:
+                print(f"ID duplicado {id}. Se omitira ese registro.")
+                continue
+
+            empleado["id"] = id
+            empleado["nombre"] = nombre
+            empleado["unidad"] = unidad
+            empleado["salario"] = salario
+            empleado["antiguedad"] = antiguedad
+
             nomina.append(empleado.copy())
-            campo = fichero.readline()
-    fichero.close()
-    return cantReg 
- 
-def imprimir_empleado(index:int):
-    print("------------------------")
-    print(f"ID: {nomina[index]["id"]}")
-    print("------------------------")
-    print(f"Unidad: {nomina[index]["unidad"]}")
-    print(f"Salario: {nomina[index]["salario"]}")
-    print(f"Antiguedad: {nomina[index]["antiguedad"]}")
+            cantReg += 1
+
+        except ValueError:
+            print(f"Datos invalidos en el registro de la linea {i + 1}. Se omitira.")
+
+    return cantReg
+
+def imprimir_empleado(index: int):
+    if not 0 <= index < len(nomina):
+        print("Indice de empleado no valido.")
+        return
+
+    print("---------------------------")
+    print(f"ID: {nomina[index]['id']}")
+    print(f"Nombre: {nomina[index]['nombre']}")
+    print(f"Unidad: {nomina[index]['unidad']}")
+    print(f"Salario: {nomina[index]['salario']}")
+    print(f"Antiguedad: {nomina[index]['antiguedad']}")
+    print("---------------------------")
